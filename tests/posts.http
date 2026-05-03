@@ -1,0 +1,34 @@
+### 1. Criar um novo post (POST)
+# Ao clicares em "Send Request" acima desta linha, um novo registo será criado.
+POST http://localhost:3000/api/posts
+Content-Type: application/json
+
+{
+  "title": "Primeira anotação oculta",
+  "content": "Este é o conteúdo do meu primeiro pensamento guardado no Apokryphos.",
+  "mood": "Focado"
+}
+
+###
+
+### 2. Listar todos os posts (GET)
+# Deve retornar um array (lista) com o post que acabaste de criar.
+GET http://localhost:3000/api/posts
+
+###
+
+### 3. Atualizar um post (PATCH)
+# ATENÇÃO: Substitui a palavra O_ID_AQUI pelo "id" verdadeiro que recebeste no teste anterior
+PATCH http://localhost:3000/api/posts/O_ID_AQUI
+Content-Type: application/json
+
+{
+  "status": "PUBLISHED",
+  "mood": "Confiante"
+}
+
+###
+
+### 4. Apagar um post (DELETE - Soft Delete)
+# ATENÇÃO: Substitui a palavra O_ID_AQUI pelo "id" verdadeiro
+DELETE http://localhost:3000/api/posts/O_ID_AQUI

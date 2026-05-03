@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// O estado do post, garantindo que não existam valores inválidos no banco
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  DELETED
+}
+
+// Entidade principal do Apokryphos
+model Post {
+  id          String     @id @default(uuid())
+  title       String
+  content     String     // Armazenará a estrutura rica em JSON gerada pelo Tiptap futuramente
+  status      PostStatus @default(DRAFT)
+  mood        String?    // Opcional, para registrar o estado emocional
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  publishedAt DateTime?
+
+  // Relacionamento explícito com as tags
+  tags        PostTag[]
+}
+
+// Entidade para categorização
+model Tag {
+  id    String    @id @default(uuid())
+  name  String    @unique // O nome será único e converteremos para lowercase via código
+  
+  posts PostTag[]
+}
+
+// Tabela pivô para o relacionamento N:N entre Post e Tag
+model PostTag {
+  postId String
+  tagId  String
+  
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  // A chave primária composta impede que a mesma tag seja vinculada duas vezes ao mesmo post
+  @@id([postId, tagId])
+}
