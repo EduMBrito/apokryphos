@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Lora, Cormorant_Garamond, Caveat } from "next/font/google";
-import "./globals.css";
+import "@/app/globals.css";
 
 // Configuração das fontes otimizadas
 const lora = Lora({
@@ -11,7 +11,7 @@ const lora = Lora({
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"], // Pesos necessários para títulos
+  weight: ["400", "500", "600", "700"],
   variable: "--font-cormorant",
   display: "swap",
 });
@@ -34,10 +34,12 @@ export default function RootLayout({
 }>) {
   return (
     <html 
-      lang="pt-BR" 
-      className={`${lora.variable} ${cormorant.variable} ${caveat.variable}`}
+      lang="pt-PT" 
+      // A classe "dark" força os componentes do shadcn a usarem as cores noturnas
+      className={`dark ${lora.variable} ${cormorant.variable} ${caveat.variable}`}
     >
-      <body className="font-sans min-h-screen">
+      {/* Aqui garantimos que o fundo e o texto serão SEMPRE da nossa paleta */}
+      <body className="font-sans min-h-screen bg-slate-900 text-slate-100 antialiased">
         {children}
       </body>
     </html>
