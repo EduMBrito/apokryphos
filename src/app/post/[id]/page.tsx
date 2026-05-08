@@ -3,13 +3,15 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import ReadOnlyEditor from "@/components/editor/ReadOnlyEditor";
+import { getServerSession } from "next-auth"; // Importação necessária
+import { authOptions } from "@/lib/auth"; // Importação necessária
 
-// Tipagem que o Next.js exige para rotas dinâmicas
 interface PostPageProps {
   params: {
     id: string;
   };
 }
+
 const statusMap: Record<string, string> = {
   DRAFT: "Rascunho",
   PUBLISHED: "Publicado",
@@ -23,8 +25,16 @@ const statusColorMap: Record<string, string> = {
 };
 
 export default async function PostPage({ params }: PostPageProps) {
-  // Busca o post específico pelo ID que veio na URL
-const post = await prisma.post.findUnique({
+  // 1. A TRAVA DE SEGURANÇA: Verifica se você está logado
+  const session = await getServerSession(authOptions);
+
+  // Se não houver sessão, tratamos como post não encontrado (proteção de privacidade)
+  if (!session) {
+    notFound();
+  }
+
+  // 2. Busca o post incluindo as tags
+  const post = await prisma.post.findUnique({
     where: { id: params.id },
     include: {
       tags: {
@@ -35,24 +45,30 @@ const post = await prisma.post.findUnique({
     },
   });
 
-  // Se o ID for inválido, direciona para uma página 404 automática
-  if (!post) {
+  if (!post || post.status === "DELETED") {
     notFound();
   }
 
   return (
     <main className="max-w-3xl mx-auto py-12 px-6 min-h-screen">
-      <Button asChild variant="ghost" className="mb-8 text-slate-400 hover:text-slate-100">
-        <Link href="/">&larr; Voltar para o Abismo</Link>
-      </Button>
-      <Button asChild variant="outline"><Link href={"/edit/" + post.id}>Editar Post</Link></Button>
+      <div className="flex justify-between items-center mb-8">
+        <Button asChild variant="ghost" className="text-slate-400 hover:text-slate-100">
+          <Link href="/">&larr; Voltar para o Abismo</Link>
+        </Button>
+        
+        {/* Atalho para edição */}
+        <Button asChild variant="outline">
+          <Link href={`/edit/${post.id}`}>Editar Post</Link>
+        </Button>
+      </div>
 
       <article>
         <header className="mb-10 border-b border-slate-800 pb-6">
           <h1 className="text-4xl md:text-5xl font-serif text-slate-100 mb-4">
             {post.title}
           </h1>
-          <div className="flex flex-wrap items-center gap-3 text-sm text-slate-400 font-sans">
+          
+          <div className="flex flex-wrap items-center gap-3 text-sm text-slate-400 font-sans mb-4">
             <time dateTime={post.createdAt.toISOString()}>
               {post.createdAt.toLocaleDateString("pt-PT")}
             </time>
@@ -67,21 +83,22 @@ const post = await prisma.post.findUnique({
               {statusMap[post.status]}
             </span>
           </div>
+
+          {/* Renderização das Tags */}
           {post.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {post.tags.map((postTag) => (
-                        <span 
-                          key={postTag.tag.id} 
-                          className="bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-md text-xs font-medium border border-indigo-500/20"
-                        >
-                          #{postTag.tag.name}
-                        </span>
-                      ))}
-                    </div>
-            )}
+            <div className="flex flex-wrap gap-2">
+              {post.tags.map((postTag) => (
+                <span 
+                  key={postTag.tag.id} 
+                  className="bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-md text-xs font-medium border border-indigo-500/20"
+                >
+                  #{postTag.tag.name}
+                </span>
+              ))}
+            </div>
+          )}
         </header>
 
-        {/* O nosso componente que lê o JSON e o transforma em HTML bonito */}
         <ReadOnlyEditor content={post.content} />
       </article>
     </main>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Lora, Cormorant_Garamond, Caveat } from "next/font/google";
 import "@/app/globals.css";
+import Navbar from "@/components/layout/Navbar";
 
 // Configuração das fontes otimizadas
 const lora = Lora({
@@ -40,6 +41,7 @@ export default function RootLayout({
     >
       {/* Aqui garantimos que o fundo e o texto serão SEMPRE da nossa paleta */}
       <body className="font-sans min-h-screen bg-slate-900 text-slate-100 antialiased">
+        <Navbar />
         {children}
       </body>
     </html>
