@@ -10,11 +10,29 @@ interface PostPageProps {
     id: string;
   };
 }
+const statusMap: Record<string, string> = {
+  DRAFT: "Rascunho",
+  PUBLISHED: "Publicado",
+  DELETED: "Excluído",
+};
+
+const statusColorMap: Record<string, string> = {
+  DRAFT: "bg-slate-700/40 text-slate-300 border-slate-500/50",
+  PUBLISHED: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  DELETED: "bg-red-500/10 text-red-400 border-red-500/20",
+};
 
 export default async function PostPage({ params }: PostPageProps) {
   // Busca o post específico pelo ID que veio na URL
-  const post = await prisma.post.findUnique({
+const post = await prisma.post.findUnique({
     where: { id: params.id },
+    include: {
+      tags: {
+        include: {
+          tag: true,
+        },
+      },
+    },
   });
 
   // Se o ID for inválido, direciona para uma página 404 automática
@@ -27,6 +45,7 @@ export default async function PostPage({ params }: PostPageProps) {
       <Button asChild variant="ghost" className="mb-8 text-slate-400 hover:text-slate-100">
         <Link href="/">&larr; Voltar para o Abismo</Link>
       </Button>
+      <Button asChild variant="outline"><Link href={"/edit/" + post.id}>Editar Post</Link></Button>
 
       <article>
         <header className="mb-10 border-b border-slate-800 pb-6">
@@ -44,10 +63,22 @@ export default async function PostPage({ params }: PostPageProps) {
               </>
             )}
             <span>•</span>
-            <span className="px-2 py-0.5 rounded-full bg-slate-900 border border-slate-700 uppercase text-xs">
-              {post.status}
+            <span className={`px-2 py-0.5 rounded-full border uppercase text-xs font-medium ${statusColorMap[post.status] || statusColorMap.DRAFT}`}>
+              {statusMap[post.status]}
             </span>
           </div>
+          {post.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {post.tags.map((postTag) => (
+                        <span 
+                          key={postTag.tag.id} 
+                          className="bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-md text-xs font-medium border border-indigo-500/20"
+                        >
+                          #{postTag.tag.name}
+                        </span>
+                      ))}
+                    </div>
+            )}
         </header>
 
         {/* O nosso componente que lê o JSON e o transforma em HTML bonito */}

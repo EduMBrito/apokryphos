@@ -23,27 +23,25 @@ model Post {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   publishedAt DateTime?
-
-  // Relacionamento explícito com as tags
   tags        PostTag[]
 }
 
 // Entidade para categorização
 model Tag {
-  id    String    @id @default(uuid())
-  name  String    @unique // O nome será único e converteremos para lowercase via código
-  
-  posts PostTag[]
+  id        String    @id @default(uuid())
+  name      String    @unique // Garante que não teremos tags duplicadas
+  posts     PostTag[]
+  createdAt DateTime  @default(now())
 }
 
 // Tabela pivô para o relacionamento N:N entre Post e Tag
 model PostTag {
-  postId String
-  tagId  String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    String
   
-  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
-  tag    Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  tagId     String
 
-  // A chave primária composta impede que a mesma tag seja vinculada duas vezes ao mesmo post
+  // A chave primária composta garante que o mesmo post não tenha a mesma tag duas vezes
   @@id([postId, tagId])
 }

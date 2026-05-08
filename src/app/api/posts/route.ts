@@ -23,22 +23,33 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { title, content, mood } = body;
+    
+    // Agora esperamos receber também um array de 'tags' (ex: ["foco", "filosofia"])
+    const { title, content, mood, tags = [] } = body;
 
-    // A tipagem do Prisma impede que passemos campos inexistentes aqui
-    const newPost = await prisma.post.create({
+    const post = await prisma.post.create({
       data: {
         title,
         content,
         mood,
+        status: "DRAFT",
+        // Magia do Prisma: Criamos o Post e as Tags ao mesmo tempo
+        tags: {
+          create: tags.map((tagName: string) => ({
+            tag: {
+              connectOrCreate: {
+                where: { name: tagName.toLowerCase() },
+                create: { name: tagName.toLowerCase() },
+              },
+            },
+          })),
+        },
       },
     });
 
-    return NextResponse.json(newPost, { status: 201 });
+    return NextResponse.json(post, { status: 201 });
   } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to create post" },
-      { status: 500 }
-    );
+    console.error("Erro ao criar post:", error);
+    return NextResponse.json({ error: "Erro interno do servidor" }, { status: 500 });
   }
 }

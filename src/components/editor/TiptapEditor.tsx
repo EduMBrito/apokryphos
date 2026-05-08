@@ -10,6 +10,15 @@ interface TiptapEditorProps {
 }
 
 export default function TiptapEditor({ content, onChange }: TiptapEditorProps) {
+  // Tenta transformar a string em objeto JSON (se for um post vindo do banco)
+  // Se falhar (ex: string vazia ao criar um post novo), mantém o valor original
+  let initialContent;
+  try {
+    initialContent = content ? JSON.parse(content) : "";
+  } catch (e) {
+    initialContent = content;
+  }
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -18,8 +27,8 @@ export default function TiptapEditor({ content, onChange }: TiptapEditorProps) {
         placeholder: "O que está oculto, reservado para si...",
       }),
     ],
-    content: content,
-    // Estilização do editor via Tailwind
+    // Usamos a nossa variável traduzida aqui
+    content: initialContent, 
     editorProps: {
       attributes: {
         class:
@@ -27,7 +36,6 @@ export default function TiptapEditor({ content, onChange }: TiptapEditorProps) {
       },
     },
     onUpdate: ({ editor }) => {
-      // Retornamos o conteúdo em formato JSON para o banco de dados futuramente
       onChange(JSON.stringify(editor.getJSON()));
     },
   });

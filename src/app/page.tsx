@@ -2,11 +2,35 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import prisma from "@/lib/prisma";
 
+const statusMap: Record<string, string> = {
+  DRAFT: "Rascunho",
+  PUBLISHED: "Publicado",
+  DELETED: "Excluído",
+};
+
+const statusColorMap: Record<string, string> = {
+  DRAFT: "bg-slate-700/40 text-slate-300 border-slate-500/50",
+  PUBLISHED: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  DELETED: "bg-red-500/10 text-red-400 border-red-500/20",
+};
+
 export default async function Home() {
   // Busca todos os posts no banco de dados, ordenados do mais recente para o mais antigo
   const posts = await prisma.post.findMany({
+    where: {
+      status: {
+        not: "DELETED",
+      },
+    },
     orderBy: {
       createdAt: "desc",
+    },
+    include: {
+      tags: {
+        include: {
+          tag: true,
+        },
+      },
     },
   });
 
@@ -57,10 +81,22 @@ export default async function Home() {
                       </>
                     )}
                     <span>•</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-slate-900 border border-slate-700">
-                      {post.status}
-                    </span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full border ${statusColorMap[post.status] || statusColorMap.DRAFT}`}>
+                        {statusMap[post.status]}
+                      </span>
                   </div>
+                  {post.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {post.tags.map((postTag) => (
+                        <span 
+                          key={postTag.tag.id} 
+                          className="bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-md text-xs font-medium border border-indigo-500/20"
+                        >
+                          #{postTag.tag.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 
                 {/* Futuramente, este botão levará para a página de leitura do post */}
