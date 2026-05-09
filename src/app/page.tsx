@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import Image from "next/image";
 
 const statusMap: Record<string, string> = {
   DRAFT: "Rascunho",
@@ -40,6 +41,14 @@ export default async function Home() {
   return (
     <main className="max-w-4xl mx-auto py-12 px-6 min-h-screen">
       <header className="flex flex-col items-center justify-center mb-16 text-center">
+        <Image 
+          src="/logo.png" 
+          alt="Símbolo do Apokryphos" 
+          width={120} 
+          height={120} 
+          className="mb-4 drop-shadow-[0_0_15px_rgba(79,70,229,0.2)]"
+          priority
+        />
         <h1 className="font-serif text-5xl md:text-7xl font-semibold mb-6">
           Apokryphos
         </h1>
@@ -77,7 +86,12 @@ export default async function Home() {
                       {post.mood && (
                         <>
                           <span>•</span>
-                          <span className="text-indigo-400 font-medium">{post.mood}</span>
+                          <Link 
+                            href={`/mood/${post.mood}`}
+                            className="text-indigo-400 font-medium transition-colors underline-offset-4 hover:underline hover:text-indigo-300 relative z-10"
+                          >
+                            {post.mood}
+                          </Link>
                         </>
                       )}
                       <span>•</span>
@@ -88,9 +102,13 @@ export default async function Home() {
                     {post.tags.length > 0 && (
                       <div className="flex flex-wrap gap-2">
                         {post.tags.map((postTag: any) => (
-                          <span key={postTag.tag.id} className="bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-md text-xs font-medium border border-indigo-500/20">
+                          <Link 
+                            key={postTag.tag.id} 
+                            href={`/tag/${postTag.tag.name}`}
+                            className="bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-colors px-2 py-0.5 rounded-md text-xs font-medium border border-indigo-500/20"
+                          >
                             #{postTag.tag.name}
-                          </span>
+                          </Link>
                         ))}
                       </div>
                     )}

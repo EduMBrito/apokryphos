@@ -75,7 +75,12 @@ export default async function PostPage({ params }: PostPageProps) {
             {post.mood && (
               <>
                 <span>•</span>
-                <span className="text-indigo-400 font-medium">{post.mood}</span>
+                <Link 
+                  href={`/mood/${post.mood}`}
+                  className="text-indigo-400 font-medium hover:text-indigo-300 transition-colors underline-offset-4 hover:underline"
+                >
+                  {post.mood}
+                </Link>
               </>
             )}
             <span>•</span>
@@ -88,12 +93,13 @@ export default async function PostPage({ params }: PostPageProps) {
           {post.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {post.tags.map((postTag) => (
-                <span 
+                <Link 
                   key={postTag.tag.id} 
-                  className="bg-indigo-500/10 text-indigo-400 px-2 py-0.5 rounded-md text-xs font-medium border border-indigo-500/20"
+                  href={`/tag/${postTag.tag.name}`}
+                  className="bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 transition-colors px-2 py-0.5 rounded-md text-xs font-medium border border-indigo-500/20"
                 >
                   #{postTag.tag.name}
-                </span>
+                </Link>
               ))}
             </div>
           )}
